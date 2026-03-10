@@ -1,0 +1,25 @@
+{
+  "name": "Lilloo — Baby Tracker",
+  "short_name": "Lilloo",
+  "description": "The smart tracker for your baby / Tracker-ul inteligent pentru bebelușul tău",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#FFF8EE",
+  "theme_color": "#CB997E",
+  "orientation": "portrait",
+  "scope": "./",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
