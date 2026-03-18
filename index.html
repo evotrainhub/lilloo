@@ -33,6 +33,7 @@
 <div id="root"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{ navigator.serviceWorker.register('./sw.js').catch(()=>{}); });
@@ -195,7 +196,7 @@ const T = {
     track:{feed:"Mâncare",medicine:"Medicament",fever:"Febră",diaper:"Scutec",sleep:"Somn",bath:"Baie",weight:"Greutate",height:"Înălțime",save:"Salvează ✓",cancel:"Anulează",timeNow:"Acum",timeCustom:"Altă oră",delete:"Șterge"},
     fields:{ml:"Cantitate (ml)",feedType:"Tip",breastL:"Sân stâng",breastR:"Sân drept",bottle:"Biberon",solid:"Diversificare",solidFood:"Ce a mâncat?",solidFoodPlaceholder:"ex: piure morcov...",medName:"Medicament",dose:"Doză",temp:"Temperatură °C",diaperType:"Tip",wet:"Umed",dirty:"Murdar",both:"Ambele",clean:"Curat",duration:"Durată (min)",kg:"Greutate (kg)",cm:"Înălțime (cm)"},
     medicine:{canTake:"Poți administra următoarea doză!",nextIn:"Următoarea doză în",lastDose:"Ultima doză",maxReached:"Doze maxime zilnice atinse!",dailyDoses:"doze azi",dosageFor:"Dozaj pentru",noInfo:"Scrie numele exact al medicamentului"},
-    premium:{title:"Premium",trialTitle:"14 zile gratuite",trialSubtitle:"Încearcă toate funcționalitățile Premium fără costuri",startTrial:"Începe trial gratuit 🎉",subscribe:"Abonează-te · 12 lei/lună",trialActive:"Trial activ",daysLeft:"zile rămase",expired:"Trial expirat",expiredMsg:"Perioada de trial s-a încheiat. Abonează-te pentru a continua.",manageSubscription:"Gestionează abonamentul",features:["📄 Raport PDF pentru pediatru","📈 Grafice de creștere OMS","👨‍👩‍👧 Multi-copil (profile nelimitate)","💉 Tracker vaccinări complet","📊 Export date CSV","🔔 Reminder-uri personalizate","☁️ Backup cloud automat (în curând)"],footer:"Funcționalitățile de bază sunt și vor rămâne gratuite. Premium adaugă unelte avansate. 💛"},
+    premium:{title:"Premium",trialTitle:"14 zile gratuite",trialSubtitle:"Încearcă toate funcționalitățile Premium fără costuri",startTrial:"Începe trial gratuit 🎉",subscribe:"Abonează-te · 12 lei/lună",trialActive:"Trial activ",daysLeft:"zile rămase",expired:"Trial expirat",expiredMsg:"Perioada de trial s-a încheiat. Abonează-te pentru a continua.",manageSubscription:"Gestionează abonamentul",features:["📄 Raport PDF pentru pediatru","📈 Grafice de creștere OMS","👨‍👩‍👧 Multi-copil (profile nelimitate)","💉 Tracker vaccinări complet","🔔 Reminder-uri personalizate"],footer:"Funcționalitățile de bază sunt și vor rămâne gratuite. Premium adaugă unelte avansate. 💛"},
     vaccines:{title:"Vaccinări",done:"Efectuat",pending:"Programat",overdue:"Întârziat",markDone:"Marchează ca efectuat",note:"Notă",addNote:"Adaugă notă..."},
     growth:{title:"Grafic creștere",weight:"Greutate",height:"Înălțime",noData:"Adaugă înregistrări de greutate/înălțime pentru a vedea graficul.",whoLines:"Curbe OMS",yourBaby:"Bebelușul tău",percentile:"Percentilă"},
     export:{title:"Export CSV",download:"Descarcă CSV",pdfTitle:"Raport pediatru",pdfDownload:"Generează PDF"},
@@ -211,7 +212,7 @@ const T = {
     track:{feed:"Feeding",medicine:"Medicine",fever:"Fever",diaper:"Diaper",sleep:"Sleep",bath:"Bath",weight:"Weight",height:"Height",save:"Save ✓",cancel:"Cancel",timeNow:"Now",timeCustom:"Custom time",delete:"Delete"},
     fields:{ml:"Amount (ml)",feedType:"Type",breastL:"Left breast",breastR:"Right breast",bottle:"Bottle",solid:"Solids",solidFood:"What did baby eat?",solidFoodPlaceholder:"e.g. carrot puree...",medName:"Medicine",dose:"Dose",temp:"Temperature °C",diaperType:"Type",wet:"Wet",dirty:"Dirty",both:"Both",clean:"Clean",duration:"Duration (min)",kg:"Weight (kg)",cm:"Height (cm)"},
     medicine:{canTake:"You can give the next dose!",nextIn:"Next dose in",lastDose:"Last dose",maxReached:"Max daily doses reached!",dailyDoses:"doses today",dosageFor:"Dosage for",noInfo:"Enter exact medicine name"},
-    premium:{title:"Premium",trialTitle:"14 days free",trialSubtitle:"Try all Premium features at no cost",startTrial:"Start free trial 🎉",subscribe:"Subscribe · $2.99/mo",trialActive:"Trial active",daysLeft:"days left",expired:"Trial expired",expiredMsg:"Your trial has ended. Subscribe to continue.",manageSubscription:"Manage subscription",features:["📄 PDF report for pediatrician","📈 WHO growth charts","👨‍👩‍👧 Multi-child (unlimited profiles)","💉 Complete vaccine tracker","📊 CSV data export","🔔 Custom reminders","☁️ Cloud backup (coming soon)"],footer:"Core features are and will remain free. Premium adds advanced tools. 💛"},
+    premium:{title:"Premium",trialTitle:"14 days free",trialSubtitle:"Try all Premium features at no cost",startTrial:"Start free trial 🎉",subscribe:"Subscribe · $2.99/mo",trialActive:"Trial active",daysLeft:"days left",expired:"Trial expired",expiredMsg:"Your trial has ended. Subscribe to continue.",manageSubscription:"Manage subscription",features:["📄 PDF report for pediatrician","📈 WHO growth charts","👨‍👩‍👧 Multi-child (unlimited profiles)","💉 Complete vaccine tracker","🔔 Custom reminders"],footer:"Core features are and will remain free. Premium adds advanced tools. 💛"},
     vaccines:{title:"Vaccines",done:"Done",pending:"Scheduled",overdue:"Overdue",markDone:"Mark as done",note:"Note",addNote:"Add note..."},
     growth:{title:"Growth Chart",weight:"Weight",height:"Height",noData:"Add weight/height entries to see the chart.",whoLines:"WHO curves",yourBaby:"Your baby",percentile:"Percentile"},
     export:{title:"Export CSV",download:"Download CSV",pdfTitle:"Pediatrician Report",pdfDownload:"Generate PDF"},
@@ -502,16 +503,20 @@ function GrowthChart({entries,setup,t}){
       :h(Fragment,null,
           h('div',{style:{background:"rgba(255,255,255,0.8)",borderRadius:14,padding:"8px",border:"1px solid #F0E8DD",overflow:"hidden"}},
             h('canvas',{ref:canvasRef,style:{width:"100%",display:"block"}})),
-          h('div',{style:{display:"flex",gap:12,marginTop:8,flexWrap:"wrap"}},
+          h('div',{style:{display:"flex",gap:8,marginTop:10,flexWrap:"wrap"}},
             h('div',{style:{display:"flex",alignItems:"center",gap:4}},
-              h('div',{style:{width:20,height:2,background:"#CB997E",borderRadius:1}}),
-              h('span',{style:{fontSize:10,color:"#8B7355"}},(lang==="ro"?"Bebelușul tău":"Your baby"))),
+              h('div',{style:{width:16,height:3,background:"#CB997E",borderRadius:1}}),
+              h('span',{style:{fontSize:10,color:"#5D4037",fontWeight:700}},(lang==="ro"?"Bebelușul tău":"Your baby"))),
             h('div',{style:{display:"flex",alignItems:"center",gap:4}},
-              h('div',{style:{width:20,height:2,background:"#E8A87C",borderRadius:1}}),
-              h('span',{style:{fontSize:10,color:"#8B7355"}},"P50 OMS")),
+              h('div',{style:{width:16,height:3,background:"#E8A87C",borderRadius:1}}),
+              h('span',{style:{fontSize:10,color:"#8B7355"}},"P50 — "+(lang==="ro"?"greutatea medie OMS":"WHO median weight"))),
             h('div',{style:{display:"flex",alignItems:"center",gap:4}},
-              h('div',{style:{width:20,height:2,background:"#C4AD97",borderRadius:1,borderTop:"2px dashed #C4AD97"}}),
-              h('span',{style:{fontSize:10,color:"#8B7355"}},"P3/P15/P85/P97")))));
+              h('div',{style:{width:16,height:2,borderTop:"2px dashed #85CDCA",borderRadius:1}}),
+              h('span',{style:{fontSize:10,color:"#8B7355"}},"P3/P15/P85/P97"))),
+          h('div',{style:{marginTop:10,padding:"10px 12px",background:"#F5F0EA",borderRadius:10,fontSize:11,color:"#7A6355",lineHeight:1.6}},
+            lang==="ro"
+              ?"💡 Percentilele OMS arată cum se compară greutatea față de copii de aceeași vârstă și sex. P50 = median (jumătate din copii sunt mai grei, jumătate mai ușori). P3–P97 = intervalul normal. Dacă bebelușul e între P3 și P97, e totul bine!"
+              :"💡 WHO percentiles show how weight compares to children of the same age and sex. P50 = median. P3–P97 = normal range. If your baby is between P3 and P97, everything is fine!")));
 }
 
 // ─── VACCINES TRACKER ───
@@ -523,9 +528,8 @@ function VaccinesTab({setup,vaccines,onToggleVaccine,onAddNote,t,isPremium,onUpg
     const doneData=vaccines[v.id];
     const isDone=!!doneData;
     const dueDate=setup?.birthDate?new Date(new Date(setup.birthDate).getTime()+v.ageMonths*30.44*24*3600*1000):null;
-    const isOverdue=!isDone&&ageMonths>v.ageMonths+1;
-    const isNear=!isDone&&ageMonths>=v.ageMonths-1&&ageMonths<=v.ageMonths+1;
-    return{...v,isDone,doneData,dueDate,isOverdue,isNear};
+    const isOverdue=!isDone&&dueDate&&dueDate.getTime()<Date.now()-28*24*3600*1000;
+    return{...v,isDone,doneData,dueDate,isOverdue};
   }),[vaccines,setup,ageMonths]);
 
   const done=scheduled.filter(v=>v.isDone);
@@ -594,15 +598,16 @@ function VaccinesTab({setup,vaccines,onToggleVaccine,onAddNote,t,isPremium,onUpg
     upcoming.length>0&&h(Fragment,null,
       h('div',{style:{fontSize:10,fontWeight:800,color:"#A08B75",letterSpacing:"0.06em",marginBottom:6}},"💉 "+(lang==="ro"?"PROGRAMATE":"UPCOMING")),
       h('div',{style:{background:"rgba(255,255,255,0.7)",borderRadius:14,overflow:"hidden",border:"1px solid #F0E8DD"}},
-        upcoming.map((v,i)=>h('div',{key:v.id,style:{padding:"12px 14px",borderBottom:i<upcoming.length-1?"1px solid #F0E8DD":"none"}},
+        upcoming.map((v,i)=>h('div',{key:v.id,style:{padding:"12px 14px",borderBottom:i<upcoming.length-1?"1px solid #F0E8DD":"none",background:v.dueDate&&v.dueDate.getTime()-Date.now()<30*24*3600*1000&&v.dueDate.getTime()>Date.now()?"#FFF8EE":"transparent"}},
           h('div',{style:{display:"flex",alignItems:"center",gap:10}},
-            h('div',{style:{width:36,height:36,borderRadius:10,background:"#F0E8DD",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}},"💉"),
+            h('div',{style:{width:36,height:36,borderRadius:10,background:v.dueDate&&v.dueDate.getTime()-Date.now()<30*24*3600*1000&&v.dueDate.getTime()>Date.now()?"#F5E6D0":"#F0E8DD",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}},v.dueDate&&v.dueDate.getTime()-Date.now()<30*24*3600*1000&&v.dueDate.getTime()>Date.now()?"⏰":"💉"),
             h('div',{style:{flex:1}},
-              h('div',{style:{fontSize:13,fontWeight:700,color:"#3D3024"}},v.name),
-              h('div',{style:{display:"flex",gap:8,marginTop:2}},
+              h('div',{style:{fontSize:13,fontWeight:700,color:v.dueDate&&v.dueDate.getTime()-Date.now()<30*24*3600*1000&&v.dueDate.getTime()>Date.now()?"#8B5E3C":"#3D3024"}},v.name),
+              h('div',{style:{display:"flex",gap:8,marginTop:2,flexWrap:"wrap",alignItems:"center"}},
                 h('span',{style:{fontSize:11,color:"#A09484"}},v.description),
-                v.dueDate&&h('span',{style:{fontSize:11,color:"#CB997E",fontWeight:600}},fmtDateFull(v.dueDate.getTime(),lang)))),
-            h('button',{onClick:()=>onToggleVaccine(v.id,true),style:{padding:"6px 12px",borderRadius:10,border:"2px solid #85CDCA",background:"#85CDCA22",cursor:"pointer",fontSize:11,fontWeight:700,color:"#5BA8A5",fontFamily:"'Quicksand',sans-serif",whiteSpace:"nowrap"}},lang==="ro"?"Efectuat":"Done")))))));
+                v.dueDate&&h('span',{style:{fontSize:11,color:"#CB997E",fontWeight:600}},
+                  (lang==="ro"?"📅 ":"📅 ")+v.dueDate.toLocaleDateString(lang==="ro"?"ro-RO":"en-US",{day:"numeric",month:"long",year:"numeric"})))),
+            h('button',{onClick:()=>onToggleVaccine(v.id,true),style:{padding:"6px 12px",borderRadius:10,border:"2px solid #85CDCA",background:"#85CDCA22",cursor:"pointer",fontSize:11,fontWeight:700,color:"#5BA8A5",fontFamily:"'Quicksand',sans-serif",whiteSpace:"nowrap",flexShrink:0}},lang==="ro"?"Efectuat":"Done")))))));
 }
 
 // ─── MULTI-CHILD SWITCHER ───
@@ -763,12 +768,7 @@ function PremiumTab({premiumState,t,lang,entries,setup,onStartTrial,onSubscribe,
           h('span',{style:{fontSize:22}},"📄"),
           h('div',null,h('div',{style:{fontSize:13,fontWeight:700,color:"#3D3024"}},lang==="ro"?"Raport PDF pentru pediatru":"PDF report for pediatrician"),h('div',{style:{fontSize:11,color:"#8B7355"}},lang==="ro"?"Include ultimele 7 zile de înregistrări":"Includes last 7 days of entries"))),
         h('button',{onClick:generatePDF,style:{width:"100%",padding:"10px",borderRadius:12,border:"2px solid #95B8D1",background:"#95B8D122",cursor:"pointer",fontSize:13,fontWeight:700,color:"#5A8FAE",fontFamily:"'Quicksand',sans-serif"}},"⬇️ "+(lang==="ro"?"Generează PDF":"Generate PDF"))),
-      // CSV
-      h('div',{style:{padding:"14px",background:"rgba(255,255,255,0.8)",borderRadius:14,border:"1px solid #F0E8DD",marginBottom:8}},
-        h('div',{style:{display:"flex",alignItems:"center",gap:10,marginBottom:10}},
-          h('span',{style:{fontSize:22}},"📊"),
-          h('div',null,h('div',{style:{fontSize:13,fontWeight:700,color:"#3D3024"}},lang==="ro"?"Export date CSV":"CSV data export"),h('div',{style:{fontSize:11,color:"#8B7355"}},(entries.length)+(lang==="ro"?" înregistrări totale":" total entries")))),
-        h('button',{onClick:exportCSV,style:{width:"100%",padding:"10px",borderRadius:12,border:"2px solid #B5CDA3",background:"#B5CDA322",cursor:"pointer",fontSize:13,fontWeight:700,color:"#8AAF72",fontFamily:"'Quicksand',sans-serif"}},"⬇️ "+(lang==="ro"?"Descarcă CSV":"Download CSV"))),
+
       // Reminders
       h('div',{style:{padding:"14px",background:"rgba(255,255,255,0.8)",borderRadius:14,border:"1px solid #F0E8DD",marginBottom:8}},
         h('div',{style:{display:"flex",alignItems:"center",gap:10}},
@@ -917,8 +917,7 @@ function Lilloo(){
     setActiveProfileId(id);setShowChildModal(false);
   }
 
-  function startTrial(){const s=startTrial_fn();setPremiumState({...s,daysLeft:TRIAL_DAYS});}
-  function startTrial_fn(){return startTrial();}
+  function handleStartTrial(){const s={status:'trial',trialStart:Date.now(),trialEnd:Date.now()+TRIAL_DAYS*86400000};saveData('premium_state',s);setPremiumState({...s,daysLeft:TRIAL_DAYS});}
 
   // Refresh premium state
   useEffect(()=>{
@@ -1005,7 +1004,7 @@ function Lilloo(){
 
       // PREMIUM
       tab==="premium"&&h(PremiumTab,{premiumState,t,lang,entries,setup,
-        onStartTrial:()=>{const s=startTrial();setPremiumState({...s,daysLeft:TRIAL_DAYS});},
+        onStartTrial:handleStartTrial,
         onSubscribe:()=>window.open(STRIPE_PAYMENT_LINK,"_blank"),
         onActivateDemo:()=>{const s=activatePremium();setPremiumState(s);}})),
 
