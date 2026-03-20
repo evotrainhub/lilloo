@@ -196,7 +196,7 @@ const T = {
     track:{feed:"Mâncare",medicine:"Medicament",fever:"Febră",diaper:"Scutec",sleep:"Somn",bath:"Baie",weight:"Greutate",height:"Înălțime",save:"Salvează ✓",cancel:"Anulează",timeNow:"Acum",timeCustom:"Altă oră",delete:"Șterge"},
     fields:{ml:"Cantitate (ml)",feedType:"Tip",breastL:"Sân stâng",breastR:"Sân drept",bottle:"Biberon",solid:"Diversificare",solidFood:"Ce a mâncat?",solidFoodPlaceholder:"ex: piure morcov...",medName:"Medicament",dose:"Doză",temp:"Temperatură °C",diaperType:"Tip",wet:"Umed",dirty:"Murdar",both:"Ambele",clean:"Curat",duration:"Durată (min)",kg:"Greutate (kg)",cm:"Înălțime (cm)"},
     medicine:{canTake:"Poți administra următoarea doză!",nextIn:"Următoarea doză în",lastDose:"Ultima doză",maxReached:"Doze maxime zilnice atinse!",dailyDoses:"doze azi",dosageFor:"Dozaj pentru",noInfo:"Scrie numele exact al medicamentului"},
-    premium:{title:"Premium",trialTitle:"14 zile gratuite",trialSubtitle:"Încearcă toate funcționalitățile Premium fără costuri",startTrial:"Începe trial gratuit 🎉",subscribe:"Abonează-te · 12 lei/lună",trialActive:"Trial activ",daysLeft:"zile rămase",expired:"Trial expirat",expiredMsg:"Perioada de trial s-a încheiat. Abonează-te pentru a continua.",manageSubscription:"Gestionează abonamentul",features:["📄 Raport PDF pentru pediatru","📈 Grafice de creștere OMS","👨‍👩‍👧 Multi-copil (profile nelimitate)","💉 Tracker vaccinări complet","🔔 Reminder-uri personalizate"],footer:"Funcționalitățile de bază sunt și vor rămâne gratuite. Premium adaugă unelte avansate. 💛"},
+    premium:{title:"Premium",trialTitle:"14 zile gratuite",trialSubtitle:"Încearcă toate funcționalitățile Premium fără costuri",startTrial:"Începe trial gratuit 🎉",subscribe:"Abonează-te · 12 lei/lună",trialActive:"Trial activ",daysLeft:"zile rămase",expired:"Trial expirat",expiredMsg:"Perioada de trial s-a încheiat. Abonează-te pentru a continua.",manageSubscription:"Gestionează abonamentul",features:["📄 Raport PDF pentru pediatru","📈 Grafice de creștere OMS","👨‍👩‍👧 Multi-copil (profile nelimitate)","💉 Tracker vaccinări complet","🔔 Reminder-uri personalizate","🔬 Interpretare rapida analize (AI)"],footer:"Funcționalitățile de bază sunt și vor rămâne gratuite. Premium adaugă unelte avansate. 💛"},
     vaccines:{title:"Vaccinări",done:"Efectuat",pending:"Programat",overdue:"Întârziat",markDone:"Marchează ca efectuat",note:"Notă",addNote:"Adaugă notă..."},
     growth:{title:"Grafic creștere",weight:"Greutate",height:"Înălțime",noData:"Adaugă înregistrări de greutate/înălțime pentru a vedea graficul.",whoLines:"Curbe OMS",yourBaby:"Bebelușul tău",percentile:"Percentilă"},
     export:{title:"Export CSV",download:"Descarcă CSV",pdfTitle:"Raport pediatru",pdfDownload:"Generează PDF"},
@@ -212,7 +212,7 @@ const T = {
     track:{feed:"Feeding",medicine:"Medicine",fever:"Fever",diaper:"Diaper",sleep:"Sleep",bath:"Bath",weight:"Weight",height:"Height",save:"Save ✓",cancel:"Cancel",timeNow:"Now",timeCustom:"Custom time",delete:"Delete"},
     fields:{ml:"Amount (ml)",feedType:"Type",breastL:"Left breast",breastR:"Right breast",bottle:"Bottle",solid:"Solids",solidFood:"What did baby eat?",solidFoodPlaceholder:"e.g. carrot puree...",medName:"Medicine",dose:"Dose",temp:"Temperature °C",diaperType:"Type",wet:"Wet",dirty:"Dirty",both:"Both",clean:"Clean",duration:"Duration (min)",kg:"Weight (kg)",cm:"Height (cm)"},
     medicine:{canTake:"You can give the next dose!",nextIn:"Next dose in",lastDose:"Last dose",maxReached:"Max daily doses reached!",dailyDoses:"doses today",dosageFor:"Dosage for",noInfo:"Enter exact medicine name"},
-    premium:{title:"Premium",trialTitle:"14 days free",trialSubtitle:"Try all Premium features at no cost",startTrial:"Start free trial 🎉",subscribe:"Subscribe · $2.99/mo",trialActive:"Trial active",daysLeft:"days left",expired:"Trial expired",expiredMsg:"Your trial has ended. Subscribe to continue.",manageSubscription:"Manage subscription",features:["📄 PDF report for pediatrician","📈 WHO growth charts","👨‍👩‍👧 Multi-child (unlimited profiles)","💉 Complete vaccine tracker","🔔 Custom reminders"],footer:"Core features are and will remain free. Premium adds advanced tools. 💛"},
+    premium:{title:"Premium",trialTitle:"14 days free",trialSubtitle:"Try all Premium features at no cost",startTrial:"Start free trial 🎉",subscribe:"Subscribe · $2.99/mo",trialActive:"Trial active",daysLeft:"days left",expired:"Trial expired",expiredMsg:"Your trial has ended. Subscribe to continue.",manageSubscription:"Manage subscription",features:["📄 PDF report for pediatrician","📈 WHO growth charts","👨‍👩‍👧 Multi-child (unlimited profiles)","💉 Complete vaccine tracker","🔔 Custom reminders","🔬 Quick lab results interpretation (AI)"],footer:"Core features are and will remain free. Premium adds advanced tools. 💛"},
     vaccines:{title:"Vaccines",done:"Done",pending:"Scheduled",overdue:"Overdue",markDone:"Mark as done",note:"Note",addNote:"Add note..."},
     growth:{title:"Growth Chart",weight:"Weight",height:"Height",noData:"Add weight/height entries to see the chart.",whoLines:"WHO curves",yourBaby:"Your baby",percentile:"Percentile"},
     export:{title:"Export CSV",download:"Download CSV",pdfTitle:"Pediatrician Report",pdfDownload:"Generate PDF"},
@@ -642,6 +642,167 @@ function ChildSwitcher({profiles,activeId,onSwitch,onAdd,onClose,t}){
 }
 
 // ─── PREMIUM TAB ───
+// ─── LAB RESULTS ───
+const WORKER_URL = "https://lilloo-worker.ruxandra-boghian.workers.dev"; // inlocuieste dupa setup Cloudflare
+
+const LAB_TESTS = [
+  {id:"acid_folic",    name:"Acid folic",                        unit:"ng/mL",  type:"number"},
+  {id:"ac_tg_iga",     name:"Ac antitransglutaminaza IgA (Celikey)", unit:"U/mL", type:"number"},
+  {id:"ac_tg_igg",     name:"Ac antitransglutaminaza IgG (Celikey)", unit:"U/mL", type:"number"},
+  {id:"alt",           name:"ALT / TGP",                         unit:"U/L",    type:"number"},
+  {id:"ag_giardia",    name:"Ag. Giardia fecale",                unit:"",       type:"select", options:["Negativ","Pozitiv"]},
+  {id:"ag_hpylori",    name:"Ag. Helicobacter pylori fecale",    unit:"",       type:"select", options:["Negativ","Pozitiv"]},
+  {id:"aslo",          name:"ASLO (antistreptolizina O)",         unit:"UI/mL",  type:"number"},
+  {id:"ast",           name:"AST / TGO",                         unit:"U/L",    type:"number"},
+  {id:"bili_directa",  name:"Bilirubina directa",                unit:"mg/dL",  type:"number"},
+  {id:"bili_totala",   name:"Bilirubina totala",                  unit:"mg/dL",  type:"number"},
+  {id:"calciu_ionic",  name:"Calciu ionic",                      unit:"mmol/L", type:"number"},
+  {id:"calciu_total",  name:"Calciu total",                      unit:"mg/dL",  type:"number"},
+  {id:"creatinina",    name:"Creatinina",                        unit:"mg/dL",  type:"number"},
+  {id:"dao",           name:"DAO (toleranta la histamina)",       unit:"HDU/mL", type:"number"},
+  {id:"ecp",           name:"ECP (proteina cationica eozinofile)",unit:"ng/mL",  type:"number"},
+  {id:"eritrocite",    name:"Eritrocite (RBC)",                   unit:"mil/uL", type:"number"},
+  {id:"copro",         name:"Examen coproparazitologic",          unit:"",       type:"select", options:["Normal","Patologic"]},
+  {id:"urina",         name:"Examen urina (sumar+sediment)",      unit:"",       type:"select", options:["Normal","Patologic","Infectie urinara suspectata"]},
+  {id:"feritina",      name:"Feritina serica",                   unit:"ng/mL",  type:"number"},
+  {id:"fibrinogen",    name:"Fibrinogen",                        unit:"mg/dL",  type:"number"},
+  {id:"fier",          name:"Fier seric / Sideremie",            unit:"ug/dL",  type:"number"},
+  {id:"fosfataza",     name:"Fosfataza alcalina",                unit:"U/L",    type:"number"},
+  {id:"fosfor",        name:"Fosfor",                            unit:"mg/dL",  type:"number"},
+  {id:"ft4",           name:"FT4 (tiroxina libera)",             unit:"ng/dL",  type:"number"},
+  {id:"ggt",           name:"GGT (gamma-glutamiltransferaza)",   unit:"U/L",    type:"number"},
+  {id:"glicemie",      name:"Glucoza / Glicemie",                unit:"mg/dL",  type:"number"},
+  {id:"hematocrit",    name:"Hematocrit (Ht)",                   unit:"%",      type:"number"},
+  {id:"hemoglobina",   name:"Hemoglobina (Hb)",                  unit:"g/dL",   type:"number"},
+  {id:"ige_total",     name:"IgE total",                         unit:"UI/mL",  type:"number"},
+  {id:"leucocite",     name:"Leucocite (WBC)",                   unit:"mii/uL", type:"number"},
+  {id:"limfocite",     name:"Limfocite",                         unit:"%",      type:"number"},
+  {id:"magneziu",      name:"Magneziu",                          unit:"mmol/L", type:"number"},
+  {id:"neutrofile",    name:"Neutrofile",                        unit:"%",      type:"number"},
+  {id:"panel_alerg_d", name:"Panel alergeni digestivi",          unit:"",       type:"select", options:["Negativ","Pozitiv - vezi detalii pe buletin"]},
+  {id:"panel_alerg_r", name:"Panel alergeni respiratorii",       unit:"",       type:"select", options:["Negativ","Pozitiv - vezi detalii pe buletin"]},
+  {id:"pcr",           name:"PCR (proteina C reactiva)",         unit:"mg/L",   type:"number"},
+  {id:"procalcitonina",name:"Procalcitonina",                    unit:"ng/mL",  type:"number"},
+  {id:"test_lactoza",  name:"Test genetic toleranta la lactoza", unit:"",       type:"select", options:["Normal (toleranta prezenta)","Intolerant la lactoza","Hipolactazie adulta"]},
+  {id:"tibc",          name:"TIBC (capacitate legare fier)",     unit:"ug/dL",  type:"number"},
+  {id:"transferina",   name:"Transferina",                       unit:"mg/dL",  type:"number"},
+  {id:"trombocite",    name:"Trombocite (PLT)",                  unit:"mii/uL", type:"number"},
+  {id:"tsh",           name:"TSH",                               unit:"mUI/L",  type:"number"},
+  {id:"uree",          name:"Uree",                              unit:"mg/dL",  type:"number"},
+  {id:"vem",           name:"VEM (volum eritrocitar mediu)",     unit:"fL",     type:"number"},
+  {id:"vitb12",        name:"Vitamina B12",                      unit:"pg/mL",  type:"number"},
+  {id:"vitd",          name:"Vitamina D (25-OH)",                unit:"ng/mL",  type:"number"},
+  {id:"vsh",           name:"VSH",                               unit:"mm/h",   type:"number"},
+  {id:"zinc",          name:"Zinc",                              unit:"ug/dL",  type:"number"},
+];
+
+function LabResults({setup,lang,t}){
+  const [ageInput,setAgeInput]=useState(()=>{
+    if(!setup?.birthDate)return"";
+    const m=calcAgeMonths(setup.birthDate);
+    return m?String(m):"";
+  });
+  const [values,setValues]=useState({});
+  const [loading,setLoading]=useState(false);
+  const [result,setResult]=useState(null);
+  const [error,setError]=useState(null);
+  const [showForm,setShowForm]=useState(false);
+  const [resultShown,setResultShown]=useState(false);
+
+  const DISCLAIMER = lang==="ro"
+    ?"⚠️ IMPORTANT: Interpretarea de mai jos este generata automat cu ajutorul inteligentei artificiale si are scop pur informativ. Nu reprezinta un diagnostic medical si nu inlocuieste consultatia unui medic specialist. Discutati intotdeauna rezultatele analizelor cu medicul pediatru al copilului dumneavoastra."
+    :"⚠️ IMPORTANT: The interpretation below is automatically generated using artificial intelligence and is for informational purposes only. It does not constitute a medical diagnosis and does not replace consultation with a specialist. Always discuss your child's test results with their pediatrician.";
+
+  const filledCount=Object.values(values).filter(v=>v!=="").length;
+
+  function setValue(id,val){setValues(prev=>({...prev,[id]:val}));}
+
+  async function interpret(){
+    if(!filledCount){alert(lang==="ro"?"Introdu cel putin o valoare.":"Enter at least one value.");return;}
+    if(!ageInput){alert(lang==="ro"?"Confirma varsta copilului.":"Confirm child's age.");return;}
+    setLoading(true);setError(null);setResult(null);
+
+    const filled=LAB_TESTS.filter(t=>values[t.id]&&values[t.id]!=="");
+    const lines=filled.map(t=>"- "+t.name+(t.unit?" ("+t.unit+")":"")+": "+values[t.id]);
+    const prompt=lang==="ro"
+      ?`Esti un asistent medical pentru parinti. Copilul are varsta de ${ageInput} luni (${Math.floor(Number(ageInput)/12)} ani si ${Number(ageInput)%12} luni).\n\nRezultatele analizelor sunt:\n${lines.join("\n")}\n\nTe rog sa oferi o interpretare clara, in limba romana, structurata astfel:\n1. Un rezumat general (1-2 fraze)\n2. Valorile normale - ce este in regula\n3. Valorile care necesita atentie - explica simplu ce inseamna\n4. Recomandari generale pentru parinte\n\nFoloseste limbaj simplu, fara termeni medicali complicati. Nu pune diagnostic. Mentioneaza ca rezultatele trebuie discutate cu medicul pediatru.`
+      :`You are a medical assistant for parents. The child is ${ageInput} months old (${Math.floor(Number(ageInput)/12)} years and ${Number(ageInput)%12} months).\n\nTest results:\n${lines.join("\n")}\n\nPlease provide a clear interpretation in English, structured as follows:\n1. General summary (1-2 sentences)\n2. Normal values - what is fine\n3. Values requiring attention - explain simply what they mean\n4. General recommendations for the parent\n\nUse simple language, avoid complex medical terms. Do not diagnose. Mention that results should be discussed with the pediatrician.`;
+
+    try{
+      const resp=await fetch(WORKER_URL,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({prompt})
+      });
+      if(!resp.ok)throw new Error("HTTP "+resp.status);
+      const data=await resp.json();
+      setResult(data.result||data.content||"");
+      setResultShown(true);
+    }catch(e){
+      setError(lang==="ro"?"Eroare la conectare. Verifica conexiunea sau configuratia Worker-ului Cloudflare.":"Connection error. Check your connection or Cloudflare Worker configuration.");
+    }
+    setLoading(false);
+  }
+
+  if(!showForm)return h('div',{style:{padding:"14px",background:"rgba(255,255,255,0.8)",borderRadius:14,border:"1px solid #F0E8DD",marginBottom:8}},
+    h('div',{style:{display:"flex",alignItems:"center",gap:10,marginBottom:10}},
+      h('span',{style:{fontSize:22}},"🔬"),
+      h('div',null,
+        h('div',{style:{fontSize:13,fontWeight:700,color:"#3D3024"}},lang==="ro"?"Interpretare rapida analize":"Quick lab results interpretation"),
+        h('div',{style:{fontSize:11,color:"#8B7355"}},lang==="ro"?"47 investigatii, interpretare cu AI":"47 investigations, AI-powered interpretation"))),
+    h('button',{onClick:()=>setShowForm(true),style:{width:"100%",padding:"10px",borderRadius:12,border:"2px solid #85CDCA",background:"#85CDCA22",cursor:"pointer",fontSize:13,fontWeight:700,color:"#5BA8A5",fontFamily:"'Quicksand',sans-serif"}},lang==="ro"?"Incepe interpretarea":"Start interpretation"));
+
+  return h('div',{style:{marginBottom:8}},
+    // Header
+    h('div',{style:{display:"flex",alignItems:"center",gap:10,marginBottom:12}},
+      h('span',{style:{fontSize:22}},"🔬"),
+      h('div',{style:{flex:1}},
+        h('div',{style:{fontSize:14,fontWeight:700,color:"#3D3024"}},lang==="ro"?"Interpretare rapida analize":"Quick lab results interpretation"),
+        h('div',{style:{fontSize:11,color:"#8B7355"}},lang==="ro"?filledCount+" valori completate":""+filledCount+" values entered")),
+      h('button',{onClick:()=>{setShowForm(false);setResult(null);setResultShown(false);setValues({});},style:{background:"none",border:"none",cursor:"pointer",fontSize:20,color:"#C4AD97",padding:"4px"}},"×")),
+
+    // Disclaimer INAINTE
+    h('div',{style:{padding:"10px 12px",background:"#FFF8EE",border:"1.5px solid #F0DFC0",borderRadius:10,fontSize:11,color:"#8B5E3C",lineHeight:1.6,marginBottom:14}},DISCLAIMER),
+
+    // Varsta
+    h('div',{style:{marginBottom:14,padding:"12px 14px",background:"rgba(255,255,255,0.8)",borderRadius:12,border:"1px solid #F0E8DD"}},
+      h('div',{style:{fontSize:12,fontWeight:700,color:"#5D4037",marginBottom:6}},lang==="ro"?"Varsta copilului (in luni)":"Child's age (in months)"),
+      h('div',{style:{display:"flex",alignItems:"center",gap:8}},
+        h('input',{type:"number",min:0,max:216,value:ageInput,onChange:e=>setAgeInput(e.target.value),placeholder:lang==="ro"?"ex: 18":"e.g. 18",style:{...inp,flex:1,padding:"8px 12px",fontSize:14}}),
+        ageInput&&h('span',{style:{fontSize:12,color:"#A09484",whiteSpace:"nowrap"}},Math.floor(Number(ageInput)/12)+"a "+Number(ageInput)%12+"l"))),
+
+    // Lista analize
+    h('div',{style:{marginBottom:14}},
+      h('div',{style:{fontSize:12,fontWeight:700,color:"#5D4037",marginBottom:8}},
+        lang==="ro"?"Introdu valorile din buletin (lasa gol ce nu ai):":"Enter values from report (leave blank if missing):"),
+      LAB_TESTS.map(test=>h('div',{key:test.id,style:{display:"flex",alignItems:"center",gap:8,padding:"8px 0",borderBottom:"1px solid #F0E8DD55"}},
+        h('div',{style:{flex:1,fontSize:12,color:values[test.id]?"#3D3024":"#A09484",fontWeight:values[test.id]?600:400}},
+          test.name+(test.unit?" ("+test.unit+")":"")),
+        test.type==="select"
+          ?h('select',{value:values[test.id]||"",onChange:e=>setValue(test.id,e.target.value),style:{fontSize:11,padding:"4px 6px",borderRadius:8,border:"1.5px solid #E8DDD0",background:"white",color:"#3D3024",maxWidth:160}},
+              h('option',{value:""},lang==="ro"?"— nu am —":"— n/a —"),
+              test.options.map(o=>h('option',{key:o,value:o},o)))
+          :h('input',{type:"number",step:"0.01",value:values[test.id]||"",onChange:e=>setValue(test.id,e.target.value),placeholder:"—",style:{width:80,padding:"4px 8px",borderRadius:8,border:"1.5px solid "+(values[test.id]?"#85CDCA":"#E8DDD0"),fontSize:12,textAlign:"right",background:values[test.id]?"#F0FAFA":"white"}})))),
+
+    // Buton interpretare
+    h('button',{
+      onClick:interpret,
+      disabled:loading||filledCount===0,
+      style:{width:"100%",padding:"13px",borderRadius:14,border:"none",background:loading||filledCount===0?"#E8DDD0":"linear-gradient(135deg,#85CDCA,#5BA8A5)",color:loading||filledCount===0?"#A09484":"#FFF",fontSize:14,fontWeight:700,cursor:loading||filledCount===0?"not-allowed":"pointer",fontFamily:"'Quicksand',sans-serif",marginBottom:12,transition:"all 0.2s"}},
+      loading?(lang==="ro"?"Se interpreteaza...":"Interpreting..."):(lang==="ro"?"Interpreteaza analizele ("+filledCount+")":"Interpret results ("+filledCount+")")),
+
+    // Error
+    error&&h('div',{style:{padding:"12px",background:"#FFF0ED",borderRadius:10,border:"1.5px solid #E27D6055",fontSize:12,color:"#C45B3E",marginBottom:12}},error),
+
+    // Rezultat
+    result&&h('div',{style:{marginBottom:8}},
+      h('div',{style:{padding:"14px",background:"linear-gradient(135deg,#F0FAFA,#E8F8F0)",borderRadius:14,border:"1.5px solid #85CDCA55",marginBottom:10}},
+        h('div',{style:{fontSize:13,fontWeight:700,color:"#3D6B68",marginBottom:8}},lang==="ro"?"Interpretare AI":"AI Interpretation"),
+        h('div',{style:{fontSize:12,color:"#3D4A48",lineHeight:1.8,whiteSpace:"pre-wrap"}},result)),
+      // Disclaimer DUPA rezultat
+      h('div',{style:{padding:"10px 12px",background:"#FFF8EE",border:"1.5px solid #F0DFC0",borderRadius:10,fontSize:11,color:"#8B5E3C",lineHeight:1.6}},DISCLAIMER)));
+}
+
 function PremiumTab({premiumState,t,lang,entries,setup,onStartTrial,onSubscribe,onActivateDemo}){
   const isActive=isPremiumActive(premiumState);
   const isExpired=premiumState?.status==="expired";
@@ -663,62 +824,87 @@ function PremiumTab({premiumState,t,lang,entries,setup,onStartTrial,onSubscribe,
 
   function generatePDF(){
     const {jsPDF}=window.jspdf||{};
-    if(!jsPDF){alert(lang==="ro"?"Biblioteca PDF se încarcă... reîncearcă":"PDF library loading... retry");return;}
+    if(!jsPDF){alert(lang==="ro"?"Biblioteca PDF se incarca... reincearca":"PDF library loading... retry");return;}
+
+    // Normalizeaza diacritice si emoji pentru jsPDF (helvetica nu suporta Unicode)
+    function pdf(str){
+      if(!str)return"";
+      return String(str)
+        .replace(/[^\x00-\x7E]/g,c=>{
+          const m={"ă":"a","â":"a","î":"i","ș":"s","ț":"t","Ă":"A","Â":"A","Î":"I","Ș":"S","Ț":"T",
+                   "ş":"s","ţ":"t","Ş":"S","Ţ":"T","é":"e","è":"e","ê":"e","ë":"e","à":"a","á":"a",
+                   "ö":"o","ü":"u","ó":"o","ú":"u","ñ":"n","ç":"c","—":"-","–":"-","×":"x"};
+          return m[c]||"";
+        });
+    }
+
     const doc=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
     const W=210,margin=20;
     let y=margin;
 
     // Header
-    doc.setFillColor(203,153,126);doc.rect(0,0,W,40,"F");
+    doc.setFillColor(203,153,126);doc.rect(0,0,W,42,"F");
     doc.setTextColor(255,255,255);doc.setFontSize(22);doc.setFont("helvetica","bold");
-    doc.text("Lilloo — Raport Medical",margin,18);
+    doc.text("Lilloo - Raport Medical",margin,18);
     doc.setFontSize(11);doc.setFont("helvetica","normal");
-    doc.text(lang==="ro"?"Raport generat automat pentru consultație pediatrică":"Auto-generated report for pediatric consultation",margin,26);
-    doc.text((lang==="ro"?"Data raportului: ":"Report date: ")+new Date().toLocaleDateString("ro-RO"),margin,34);
-    y=50;
+    doc.text(pdf(lang==="ro"?"Raport generat automat pentru consultatie pediatrica":"Auto-generated report for pediatric consultation"),margin,27);
+    doc.text(pdf((lang==="ro"?"Data raportului: ":"Report date: ")+new Date().toLocaleDateString("ro-RO")),margin,35);
+    y=52;
 
-    // Baby info
+    // Baby info box
+    doc.setFillColor(255,248,238);doc.rect(margin,y-4,W-2*margin,44,"F");
+    doc.setTextColor(93,64,55);doc.setFontSize(13);doc.setFont("helvetica","bold");
+    doc.text(pdf(lang==="ro"?"Informatii pacient":"Patient information"),margin+4,y+3);y+=10;
+    doc.setFontSize(10);doc.setTextColor(80,60,50);
     if(setup){
-      doc.setTextColor(93,64,55);doc.setFontSize(14);doc.setFont("helvetica","bold");
-      doc.text(lang==="ro"?"Informații pacient":"Patient information",margin,y);y+=7;
-      doc.setFontSize(10);doc.setFont("helvetica","normal");doc.setTextColor(80,60,50);
-      const ageStr=calcAge(setup.birthDate,T[lang])||"—";
+      const ageStr=calcAge(setup.birthDate,T[lang])||"-";
       const wt=entries.find(e=>e.typeId==="weight"&&e.details?.kg);
       const ht=entries.find(e=>e.typeId==="height"&&e.details?.cm);
-      [[lang==="ro"?"Nume":"Name",setup.name],[lang==="ro"?"Dată naștere":"Birth date",setup.birthDate||"—"],[lang==="ro"?"Vârstă":"Age",ageStr],[lang==="ro"?"Greutate actuală":"Current weight",(wt?.details?.kg||setup.birthWeight||"—")+"kg"],[lang==="ro"?"Înălțime actuală":"Current height",(ht?.details?.cm||"—")+"cm"]].forEach(([label,val])=>{
-        doc.setFont("helvetica","bold");doc.text(label+":",margin,y);
-        doc.setFont("helvetica","normal");doc.text(String(val),margin+50,y);y+=6;
+      const infoRows=[
+        [lang==="ro"?"Nume":"Name", setup.name],
+        [lang==="ro"?"Data nasterii":"Birth date", setup.birthDate||"-"],
+        [lang==="ro"?"Varsta":"Age", ageStr],
+        [lang==="ro"?"Greutate":"Weight", (wt?.details?.kg||setup.birthWeight||"-")+"kg"],
+        [lang==="ro"?"Inaltime":"Height", (ht?.details?.cm||"-")+"cm"],
+      ];
+      const col2=margin+4+55;
+      infoRows.forEach(([label,val],i)=>{
+        const cx=i<3?margin+4:col2;
+        const cy=i<3?y+(i*6):y+((i-3)*6);
+        doc.setFont("helvetica","bold");doc.text(pdf(label)+":",cx,cy);
+        doc.setFont("helvetica","normal");doc.text(pdf(String(val)),cx+30,cy);
       });
-      y+=5;
     }
+    y+=22;
 
     // Separator
     doc.setDrawColor(203,153,126);doc.setLineWidth(0.5);doc.line(margin,y,W-margin,y);y+=8;
 
-    // Last 7 days entries
+    // Last 7 days
     doc.setFontSize(13);doc.setFont("helvetica","bold");doc.setTextColor(93,64,55);
-    doc.text(lang==="ro"?"Înregistrări ultimele 7 zile":"Last 7 days entries",margin,y);y+=7;
+    doc.text(pdf(lang==="ro"?"Inregistrari ultimele 7 zile":"Last 7 days entries"),margin,y);y+=7;
 
     const sevenDaysAgo=Date.now()-7*86400000;
     const recent=entries.filter(e=>e.timestamp>=sevenDaysAgo).sort((a,b)=>b.timestamp-a.timestamp);
 
     if(!recent.length){
       doc.setFontSize(10);doc.setFont("helvetica","normal");doc.setTextColor(160,148,132);
-      doc.text(lang==="ro"?"Nicio înregistrare în ultimele 7 zile":"No entries in last 7 days",margin,y);y+=8;
+      doc.text(pdf(lang==="ro"?"Nicio inregistrare in ultimele 7 zile":"No entries in last 7 days"),margin,y);y+=8;
     } else {
       const typeGroups={};
       recent.forEach(e=>{if(!typeGroups[e.typeId])typeGroups[e.typeId]=[];typeGroups[e.typeId].push(e);});
       Object.entries(typeGroups).forEach(([typeId,es])=>{
-        const type=TYPES.find(x=>x.id===typeId);
+        if(y>265){doc.addPage();y=margin;}
+        const typeName=pdf((T[lang]||T.ro).track[typeId]||typeId);
         doc.setFontSize(11);doc.setFont("helvetica","bold");doc.setTextColor(93,64,55);
-        doc.text((type?.icon||"•")+" "+((T[lang]||T.ro).track[typeId]||typeId)+" ("+es.length+"×)",margin,y);y+=5;
+        doc.text("[ "+typeName+" ] ("+es.length+"x)",margin,y);y+=5;
         es.slice(0,5).forEach(e=>{
           if(y>270){doc.addPage();y=margin;}
-          const det=Object.entries(e.details||{}).map(([k,v])=>v).filter(Boolean).join(", ");
+          const det=pdf(Object.entries(e.details||{}).map(([k,v])=>v).filter(Boolean).join(", "));
           doc.setFontSize(9);doc.setFont("helvetica","normal");doc.setTextColor(120,100,85);
-          doc.text("  "+fmtDate(e.timestamp,lang)+" "+fmtTime(e.timestamp)+(det?" — "+det:""),margin,y);y+=5;
+          doc.text("  "+fmtDate(e.timestamp,lang)+" "+fmtTime(e.timestamp)+(det?" - "+det:""),margin,y);y+=5;
         });
-        if(es.length>5){doc.setFontSize(8);doc.text("  ... și "+(es.length-5)+" mai multe",margin,y);y+=5;}
+        if(es.length>5){doc.setFontSize(8);doc.setTextColor(160,148,132);doc.text(pdf("  ... si "+(es.length-5)+" mai multe"),margin,y);y+=5;}
         y+=2;
       });
     }
@@ -729,18 +915,18 @@ function PremiumTab({premiumState,t,lang,entries,setup,onStartTrial,onSubscribe,
       if(y>260){doc.addPage();y=margin;}
       doc.setDrawColor(203,153,126);doc.line(margin,y,W-margin,y);y+=8;
       doc.setFontSize(13);doc.setFont("helvetica","bold");doc.setTextColor(93,64,55);
-      doc.text(lang==="ro"?"Medicamente administrate (7 zile)":"Medications given (7 days)",margin,y);y+=7;
+      doc.text(pdf(lang==="ro"?"Medicamente administrate (7 zile)":"Medications given (7 days)"),margin,y);y+=7;
       const medMap={};
       medEntries.forEach(e=>{const k=e.details?.name||"?";if(!medMap[k])medMap[k]=0;medMap[k]++;});
       Object.entries(medMap).forEach(([name,count])=>{
         doc.setFontSize(10);doc.setFont("helvetica","normal");doc.setTextColor(80,60,50);
-        doc.text("• "+name+" — "+count+" "+(lang==="ro"?"doze":"doses"),margin,y);y+=6;
+        doc.text("- "+pdf(name)+" - "+count+" "+(lang==="ro"?"doze":"doses"),margin,y);y+=6;
       });
     }
 
     // Footer
     doc.setFontSize(8);doc.setTextColor(160,148,132);
-    doc.text("Generat de Lilloo Baby Tracker · lilloo.app · Verificați întotdeauna cu medicul pediatru",margin,285);
+    doc.text("Generat de Lilloo Baby Tracker · lilloo.app · Verificati intotdeauna cu medicul pediatru",margin,285);
 
     doc.save("lilloo_raport_pediatru_"+new Date().toISOString().slice(0,10)+".pdf");
   }
@@ -774,7 +960,10 @@ function PremiumTab({premiumState,t,lang,entries,setup,onStartTrial,onSubscribe,
         h('div',{style:{display:"flex",alignItems:"center",gap:10}},
           h('span',{style:{fontSize:22}},"🔔"),
           h('div',{style:{flex:1}},h('div',{style:{fontSize:13,fontWeight:700,color:"#3D3024"}},lang==="ro"?"Reminder-uri":"Reminders"),h('div',{style:{fontSize:11,color:"#8B7355"}},lang==="ro"?"Activează notificările browserului":"Enable browser notifications")),
-          h('button',{onClick:()=>Notification.requestPermission().then(r=>alert(r==="granted"?(lang==="ro"?"Notificări activate!":"Notifications enabled!"):(lang==="ro"?"Accesul a fost refuzat":"Permission denied"))),style:{padding:"6px 12px",borderRadius:10,border:"2px solid #C38D9E",background:"#C38D9E22",cursor:"pointer",fontSize:11,fontWeight:700,color:"#9E6878",fontFamily:"'Quicksand',sans-serif"}},lang==="ro"?"Activează":"Enable")))),
+          h('button',{onClick:()=>Notification.requestPermission().then(r=>alert(r==="granted"?(lang==="ro"?"Notificări activate!":"Notifications enabled!"):(lang==="ro"?"Accesul a fost refuzat":"Permission denied"))),style:{padding:"6px 12px",borderRadius:10,border:"2px solid #C38D9E",background:"#C38D9E22",cursor:"pointer",fontSize:11,fontWeight:700,color:"#9E6878",fontFamily:"'Quicksand',sans-serif"}},lang==="ro"?"Activează":"Enable"))),
+
+      // Lab Results
+      h(LabResults,{setup,lang,t})),
 
     // Features preview (locked)
     !isActive&&h('div',null,
