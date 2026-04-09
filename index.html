@@ -708,6 +708,7 @@ function LabResults({setup,lang,t}){
   const [error,setError]=useState(null);
   const [showForm,setShowForm]=useState(false);
   const [resultShown,setResultShown]=useState(false);
+const [remaining,setRemaining]=useState(null);
 
   const DISCLAIMER = lang==="ro"
     ?"⚠️ IMPORTANT: Interpretarea de mai jos este generata automat cu ajutorul inteligentei artificiale si are scop pur informativ. Nu reprezinta un diagnostic medical si nu inlocuieste consultatia unui medic specialist. Discutati intotdeauna rezultatele analizelor cu medicul pediatru al copilului dumneavoastra."
@@ -721,6 +722,8 @@ function LabResults({setup,lang,t}){
     if(!filledCount){alert(lang==="ro"?"Introdu cel putin o valoare.":"Enter at least one value.");return;}
     if(!ageInput){alert(lang==="ro"?"Confirma varsta copilului.":"Confirm child's age.");return;}
     setLoading(true);setError(null);setResult(null);
+let userId=localStorage.getItem('lilloo_uid');
+if(!userId){userId='u_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);localStorage.setItem('lilloo_uid',userId);}
 
     const filled=LAB_TESTS.filter(t=>values[t.id]&&values[t.id]!=="");
     const lines=filled.map(t=>"- "+t.name+(t.unit?" ("+t.unit+")":"")+": "+values[t.id]);
@@ -732,12 +735,14 @@ function LabResults({setup,lang,t}){
       const resp=await fetch(WORKER_URL,{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({prompt})
+        body:JSON.stringify({prompt,userId})
       });
       if(!resp.ok)throw new Error("HTTP "+resp.status);
       const data=await resp.json();
-      setResult(data.result||data.content||"");
-      setResultShown(true);
+      if(data.error==="limit"){setError(lang==="ro"?"Ai atins limita de 3 interpretari pe luna. Ne revedem luna viitoare!":"You have reached the limit of 3 interpretations per month. Come back next month!");setLoading(false);return;}
+setResult(data.result||data.content||"");
+if(data.remaining!==undefined)setRemaining(data.remaining);
+setResultShown(true);
     }catch(e){
       setError(lang==="ro"?"Eroare la conectare. Verifica conexiunea sau configuratia Worker-ului Cloudflare.":"Connection error. Check your connection or Cloudflare Worker configuration.");
     }
